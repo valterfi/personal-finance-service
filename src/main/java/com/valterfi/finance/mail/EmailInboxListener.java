@@ -5,7 +5,6 @@ import java.util.Properties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import jakarta.mail.Flags;
 import jakarta.mail.Folder;
@@ -24,12 +23,10 @@ public class EmailInboxListener {
         this.properties = properties;
     }
 
-    @Scheduled(fixedDelayString = "${mail.listener.poll-interval-ms}")
+    @Scheduled(cron = "${mail.listener.cron-expression}")
     public void pollInbox() {
-        validateConfiguration();
-
         Properties mailProperties = new Properties();
-        String protocol = properties.getProtocol();
+        String protocol = resolveStoreProtocol();
 
         mailProperties.put("mail.store.protocol", protocol);
         mailProperties.put("mail." + protocol + ".host", properties.getHost());
@@ -59,15 +56,13 @@ public class EmailInboxListener {
         }
     }
 
-    private void validateConfiguration() {
-        if (!StringUtils.hasText(properties.getHost())) {
-            throw new IllegalStateException("mail.listener.host must be configured");
+    private String resolveStoreProtocol() {
+        String configuredProtocol = properties.getProtocol();
+
+        if (!properties.isSslEnable() && "imaps".equalsIgnoreCase(configuredProtocol)) {
+            return "imap";
         }
-        if (!StringUtils.hasText(properties.getUsername())) {
-            throw new IllegalStateException("mail.listener.username must be configured");
-        }
-        if (!StringUtils.hasText(properties.getPassword())) {
-            throw new IllegalStateException("mail.listener.password must be configured");
-        }
+
+        return configuredProtocol;
     }
 }

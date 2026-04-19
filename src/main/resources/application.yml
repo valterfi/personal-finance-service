@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: personal-finance-service
+
+mail:
+  listener:
+    enabled: true
+    host: "localhost"
+    port: 143
+    username: "any"
+    password: "any"
+    protocol: imap
+    folder: INBOX
+    cron-expression: "0 */1 * * * *"
+    ssl-enable: false
+    starttls-enable: false
+    mark-as-read: true

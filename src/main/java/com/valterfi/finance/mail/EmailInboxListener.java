@@ -12,7 +12,9 @@ import jakarta.mail.Message;
 import jakarta.mail.Session;
 import jakarta.mail.Store;
 import jakarta.mail.search.FlagTerm;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @ConditionalOnProperty(prefix = "mail.listener", name = "enabled", havingValue = "true")
 public class EmailInboxListener {
@@ -44,7 +46,7 @@ public class EmailInboxListener {
 
                 Message[] unreadMessages = inbox.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
                 for (Message message : unreadMessages) {
-                    System.out.println("Unread email: " + message.getSubject());
+                    System.out.println("Unread email: subject=" + message.getSubject() + ", body=" + extractBody(message));
 
                     if (properties.isMarkAsRead()) {
                         message.setFlag(Flags.Flag.SEEN, true);
@@ -64,5 +66,19 @@ public class EmailInboxListener {
         }
 
         return configuredProtocol;
+    }
+
+    private String extractBody(Message message) {
+        try {
+            Object content = message.getContent();
+            return normalizeBody(content == null ? "" : String.valueOf(content));
+        } catch (Exception exception) {
+            log.error("Failed to extract email body", exception);
+            return "[unable to read body: " + exception.getMessage() + "]";
+        }
+    }
+
+    private String normalizeBody(String body) {
+        return body.replaceAll("\\s+", " ").trim();
     }
 }

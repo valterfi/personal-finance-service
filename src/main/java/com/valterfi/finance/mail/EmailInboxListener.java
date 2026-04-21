@@ -61,7 +61,7 @@ public class EmailInboxListener {
                 log.info("Found {} unread messages matching the configured filter", unreadMessages.length);
 
                 for (Message message : unreadMessages) {
-                    System.out.println("Unread email: subject=" + message.getSubject() + ", body=" + extractBody(message));
+                    log.info("Unread email: subject={}, body={}", message.getSubject(), extractBody(message));
 
                     if (properties.isMarkAsRead()) {
                         message.setFlag(Flags.Flag.SEEN, true);

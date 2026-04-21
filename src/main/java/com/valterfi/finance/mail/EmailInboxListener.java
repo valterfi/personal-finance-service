@@ -15,19 +15,20 @@ import jakarta.mail.search.AndTerm;
 import jakarta.mail.search.FlagTerm;
 import jakarta.mail.search.SearchTerm;
 import jakarta.mail.search.SubjectTerm;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
+import com.valterfi.finance.service.MessageService;
+
 @Slf4j
 @Component
+@AllArgsConstructor
 @ConditionalOnProperty(prefix = "mail.listener", name = "enabled", havingValue = "true")
 public class EmailInboxListener {
 
     private final EmailListenerProperties properties;
-
-    public EmailInboxListener(EmailListenerProperties properties) {
-        this.properties = properties;
-    }
+    private final MessageService messageService;
 
     @Scheduled(cron = "${mail.listener.cron-expression}")
     public void pollInbox() {
@@ -62,7 +63,7 @@ public class EmailInboxListener {
 
                 for (Message message : unreadMessages) {
                     log.info("Unread email: subject={}, body={}", message.getSubject(), extractBody(message));
-
+                    messageService.process(message);
                     if (properties.isMarkAsRead()) {
                         message.setFlag(Flags.Flag.SEEN, true);
                     }

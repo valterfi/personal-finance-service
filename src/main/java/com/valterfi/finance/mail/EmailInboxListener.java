@@ -34,6 +34,15 @@ public class EmailInboxListener {
         Properties mailProperties = new Properties();
         String protocol = resolveStoreProtocol();
 
+        log.info(
+                "Polling inbox host={}, port={}, folder={}, protocol={}, subjectText={}, markAsRead={}",
+                properties.getHost(),
+                properties.getPort(),
+                properties.getFolder(),
+                protocol,
+                properties.getSubjectText(),
+                properties.isMarkAsRead());
+
         mailProperties.put("mail.store.protocol", protocol);
         mailProperties.put("mail." + protocol + ".host", properties.getHost());
         mailProperties.put("mail." + protocol + ".port", String.valueOf(properties.getPort()));
@@ -49,6 +58,8 @@ public class EmailInboxListener {
                 inbox.open(Folder.READ_WRITE);
 
                 Message[] unreadMessages = inbox.search(buildSearchTerm());
+                log.info("Found {} unread messages matching the configured filter", unreadMessages.length);
+
                 for (Message message : unreadMessages) {
                     System.out.println("Unread email: subject=" + message.getSubject() + ", body=" + extractBody(message));
 
@@ -58,6 +69,7 @@ public class EmailInboxListener {
                 }
             }
         } catch (Exception exception) {
+            log.error("Failed to poll inbox host={}, folder={}", properties.getHost(), properties.getFolder(), exception);
             throw new IllegalStateException("Failed to poll email inbox", exception);
         }
     }

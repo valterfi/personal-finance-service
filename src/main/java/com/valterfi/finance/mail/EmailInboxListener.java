@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
 import com.valterfi.finance.service.MessageService;
+import com.valterfi.finance.util.MessageUtils;
 
 @Slf4j
 @Component
@@ -62,7 +63,7 @@ public class EmailInboxListener {
                 log.info("Found {} unread messages matching the configured filter", unreadMessages.length);
 
                 for (Message message : unreadMessages) {
-                    log.info("Unread email: subject={}, body={}", message.getSubject(), extractBody(message));
+                    log.info("Unread email: subject={}, body={}", message.getSubject(), MessageUtils.extractBody(message));
                     messageService.process(message);
                     if (properties.isMarkAsRead()) {
                         message.setFlag(Flags.Flag.SEEN, true);
@@ -93,19 +94,5 @@ public class EmailInboxListener {
         }
 
         return new AndTerm(unreadTerm, new SubjectTerm(properties.getSubjectText()));
-    }
-
-    private String extractBody(Message message) {
-        try {
-            Object content = message.getContent();
-            return normalizeBody(content == null ? "" : String.valueOf(content));
-        } catch (Exception exception) {
-            log.error("Failed to extract email body", exception);
-            return "[unable to read body: " + exception.getMessage() + "]";
-        }
-    }
-
-    private String normalizeBody(String body) {
-        return body.replaceAll("\\s+", " ").trim();
     }
 }

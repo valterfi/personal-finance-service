@@ -11,8 +11,12 @@ import jakarta.mail.Folder;
 import jakarta.mail.Message;
 import jakarta.mail.Session;
 import jakarta.mail.Store;
+import jakarta.mail.search.AndTerm;
 import jakarta.mail.search.FlagTerm;
+import jakarta.mail.search.SearchTerm;
+import jakarta.mail.search.SubjectTerm;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Component
@@ -44,7 +48,7 @@ public class EmailInboxListener {
             try (Folder inbox = store.getFolder(properties.getFolder())) {
                 inbox.open(Folder.READ_WRITE);
 
-                Message[] unreadMessages = inbox.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
+                Message[] unreadMessages = inbox.search(buildSearchTerm());
                 for (Message message : unreadMessages) {
                     System.out.println("Unread email: subject=" + message.getSubject() + ", body=" + extractBody(message));
 
@@ -66,6 +70,16 @@ public class EmailInboxListener {
         }
 
         return configuredProtocol;
+    }
+
+    private SearchTerm buildSearchTerm() {
+        SearchTerm unreadTerm = new FlagTerm(new Flags(Flags.Flag.SEEN), false);
+
+        if (!StringUtils.hasText(properties.getSubjectText())) {
+            return unreadTerm;
+        }
+
+        return new AndTerm(unreadTerm, new SubjectTerm(properties.getSubjectText()));
     }
 
     private String extractBody(Message message) {

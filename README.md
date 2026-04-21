@@ -4,7 +4,7 @@ Small Spring Boot service with an email inbox listener.
 
 ## What It Does
 
-When `mail.listener.enabled=true`, the application connects to the configured IMAP inbox, finds unread emails, prints the subject and body with `System.out.println`, and optionally marks the messages as read.
+When `mail.listener.enabled=true`, the application connects to the configured IMAP inbox, finds unread emails that match the configured subject text, prints the subject and body with `System.out.println`, and optionally marks the messages as read.
 
 The listener currently runs on a cron schedule configured in `application.yml`.
 
@@ -15,7 +15,7 @@ The listener currently runs on a cron schedule configured in `application.yml`.
 - `src/main/java/com/valterfi/finance/mail/EmailListenerProperties.java`
   Maps the `mail.listener.*` configuration from YAML into a typed Java class.
 - `src/main/java/com/valterfi/finance/mail/EmailInboxListener.java`
-  Connects to the inbox, fetches unread messages, prints them, and marks them as read when configured.
+  Connects to the inbox, fetches unread messages filtered by subject text, prints them, and marks them as read when configured.
 - `src/main/resources/application.yml`
   Application configuration, including IMAP host, credentials, protocol, cron expression, and SSL flags.
 
@@ -24,7 +24,7 @@ The listener currently runs on a cron schedule configured in `application.yml`.
 1. Spring starts the application.
 2. If `mail.listener.enabled` is `true`, the scheduled method runs using the configured cron expression.
 3. The listener opens the configured mail store and folder.
-4. It searches for unread messages.
+4. It searches for unread messages and filters them by the configured subject text when provided.
 5. For each unread message, it prints:
 
 ```text
@@ -47,6 +47,7 @@ mail:
     password: "any"
     protocol: imap
     folder: INBOX
+    subject-text: "test"
     cron-expression: "0 */1 * * * *"
     ssl-enable: false
     starttls-enable: false
@@ -57,6 +58,7 @@ Notes:
 
 - Use `imap` for non-SSL connections.
 - Use `imaps` when you want implicit SSL.
+- `subject-text` is used to filter unread emails by subject.
 - `cron-expression: "0 */1 * * * *"` means once per minute.
 - The current body extraction is intentionally simple and uses `message.getContent()`.
 
@@ -89,4 +91,3 @@ To test locally:
 ```bash
 ./mvnw spring-boot:run
 ```
-

@@ -24,6 +24,7 @@ public class EmailListenerProperties {
     private String password;
     private String protocol = "imap";
     private String folder = "INBOX";
+    private String subjectText = "";
 
     @NotBlank
     private String cronExpression = "0 */1 * * * *";

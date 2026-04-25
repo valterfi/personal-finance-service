@@ -1,0 +1,43 @@
+name: personal-finance
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: personal-finance-postgres
+    environment:
+      POSTGRES_DB: personal_finance
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d personal_finance"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  personal-finance-service:
+    build:
+      context: .
+    container_name: personal-finance-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/personal_finance
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_LIQUIBASE_ENABLED: "true"
+      SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yml
+      LOGGING_LEVEL_LIQUIBASE: info
+      MAIL_LISTENER_ENABLED: "false"
+    restart: unless-stopped
+
+volumes:
+  postgres-data:

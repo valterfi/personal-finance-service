@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.valterfi.finance.model.Transaction;
+import com.valterfi.finance.repository.TransactionRepository;
 import com.valterfi.finance.util.MessageUtils;
 
 @Slf4j
@@ -17,6 +18,7 @@ import com.valterfi.finance.util.MessageUtils;
 public class MessageService {
 
     private final MessageParser messageParser;
+    private final TransactionRepository transactionRepository;
 
     public void process(Message message) {
         try {
@@ -29,7 +31,11 @@ public class MessageService {
 
             if (transactions.isEmpty()) {
                 log.info("No transaction pattern matched for message subject={}", message.getSubject());
+                return;
             }
+
+            List<Transaction> savedTransactions = transactionRepository.saveAll(transactions);
+            log.info("Persisted {} transactions", savedTransactions.size());
         } catch (Exception exception) {
             log.error("Failed to process message subject={}", MessageUtils.safeSubject(message), exception);
         }

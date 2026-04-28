@@ -36,7 +36,7 @@ services:
       SPRING_LIQUIBASE_ENABLED: "true"
       SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yml
       LOGGING_LEVEL_LIQUIBASE: info
-      MAIL_LISTENER_ENABLED: "false"
+      MAIL_LISTENER_ENABLED: "true"
     restart: unless-stopped
 
 volumes:

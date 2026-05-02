@@ -24,3 +24,6 @@
 
 # Local History for Visual Studio Code
 .history/
+
+# Local environment
+.env

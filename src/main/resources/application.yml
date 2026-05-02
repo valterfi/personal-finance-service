@@ -28,3 +28,11 @@ mail:
     ssl-enable: false
     starttls-enable: false
     mark-as-read: true
+
+# Configura a URL base do servidor Ollama.
+langchain4j:
+  ollama:
+    chat-model:
+      base-url: "http://localhost:11434"
+      model-name: "qwen2.5-coder:3b"
+      timeout: "PT60S"

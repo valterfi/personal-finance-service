@@ -29,10 +29,26 @@ mail:
     starttls-enable: false
     mark-as-read: true
 
-# Configura a URL base do servidor Ollama.
 langchain4j:
   ollama:
     chat-model:
       base-url: "http://localhost:11434"
       model-name: "qwen2.5-coder:3b"
-      timeout: "PT60S"
+      timeout: "PT240S"
+    embedding-model:
+      base-url: "http://localhost:11434"
+      model-name: "nomic-embed-text"
+      timeout: "PT240S"
+
+finance:
+  rag:
+    path: "src/main/resources/rag"
+    max-segment-size: 1000
+    max-overlap-size: 200
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web.client.DefaultRestClient: DEBUG
+    dev.langchain4j: DEBUG
+

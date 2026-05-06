@@ -2,7 +2,7 @@ name: personal-finance
 
 services:
   postgres:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:0.8.1-pg16-trixie
     container_name: personal-finance-postgres
     environment:
       POSTGRES_DB: personal_finance
@@ -12,6 +12,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U root -d personal_finance"]
       interval: 10s

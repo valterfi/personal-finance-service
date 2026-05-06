@@ -19,7 +19,7 @@ public class FinanceAgentResource {
 
     @PostMapping(consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
     public String ask(@RequestBody String question) {
-        return assistant.chat(question);
+        return assistant.chat("session-123", question);
     }
 
 }

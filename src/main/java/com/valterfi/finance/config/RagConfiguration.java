@@ -2,7 +2,7 @@ package com.valterfi.finance.config;
 
 import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.document.DocumentSplitter;
-import dev.langchain4j.data.document.loader.FileSystemDocumentLoader;
+import dev.langchain4j.data.document.loader.ClassPathDocumentLoader;
 import dev.langchain4j.data.document.splitter.DocumentSplitters;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.nio.file.Path;
 import java.util.List;
 
 @Configuration
@@ -29,7 +28,7 @@ public class RagConfiguration {
             @Value("${finance.rag.max-overlap-size}") int maxOverlapSize) {
 
         EmbeddingStore<TextSegment> embeddingStore = new InMemoryEmbeddingStore<>();
-        List<Document> documents = FileSystemDocumentLoader.loadDocuments(Path.of(ragPath));
+        List<Document> documents = ClassPathDocumentLoader.loadDocumentsRecursively(ragPath);
         DocumentSplitter splitter = DocumentSplitters.recursive(maxSegmentSize, maxOverlapSize);
 
         EmbeddingStoreIngestor.builder()

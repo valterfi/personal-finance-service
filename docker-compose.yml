@@ -24,6 +24,9 @@ services:
     build:
       context: .
     container_name: personal-finance-service
+    env_file:
+      - path: .env
+        required: false
     ports:
       - "8080:8080"
     depends_on:
@@ -39,6 +42,7 @@ services:
       SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yml
       LOGGING_LEVEL_LIQUIBASE: info
       MAIL_LISTENER_ENABLED: "true"
+      finance.rag.path: "rag"
     restart: unless-stopped
 
 volumes:

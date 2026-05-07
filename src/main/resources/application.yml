@@ -42,7 +42,7 @@ langchain4j:
 
 finance:
   rag:
-    path: "src/main/resources/rag"
+    path: "rag"
     max-segment-size: 1000
     max-overlap-size: 200
 
@@ -51,4 +51,3 @@ logging:
     root: INFO
     org.springframework.web.client.DefaultRestClient: DEBUG
     dev.langchain4j: DEBUG
-

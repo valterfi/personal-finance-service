@@ -1,0 +1,10 @@
+langchain4j:
+  ollama:
+    chat-model:
+      base-url: "${LANGCHAIN4J_OLLAMA_CHAT_MODEL_BASE_URL:http://localhost:11434}"
+      model-name: "${LANGCHAIN4J_OLLAMA_CHAT_MODEL_NAME:llama3.2:1b}"
+      timeout: "PT240S"
+    embedding-model:
+      base-url: "${LANGCHAIN4J_OLLAMA_EMBEDDING_MODEL_BASE_URL:http://localhost:11434}"
+      model-name: "${LANGCHAIN4J_OLLAMA_EMBEDDING_MODEL_NAME:nomic-embed-text}"
+      timeout: "PT240S"

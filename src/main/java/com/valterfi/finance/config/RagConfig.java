@@ -11,6 +11,7 @@ import dev.langchain4j.rag.content.retriever.EmbeddingStoreContentRetriever;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
 import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +19,8 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 @Configuration
-public class RagConfiguration {
+@ConditionalOnProperty(prefix = "finance.rag", name = "enabled", havingValue = "true", matchIfMissing = true)
+public class RagConfig {
 
     @Bean
     EmbeddingStore<TextSegment> embeddingStore(

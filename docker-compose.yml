@@ -23,6 +23,8 @@ services:
   personal-finance-service:
     build:
       context: .
+      args:
+        MAVEN_PROFILE: ${APP_PROFILE:-ollama}
     container_name: personal-finance-service
     env_file:
       - path: .env
@@ -37,13 +39,14 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_PROFILES_ACTIVE: ${APP_PROFILE:-ollama}
       SPRING_JPA_HIBERNATE_DDL_AUTO: validate
       SPRING_LIQUIBASE_ENABLED: "true"
       SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yml
       LOGGING_LEVEL_LIQUIBASE: info
       MAIL_LISTENER_ENABLED: "true"
       finance.rag.path: "rag"
-    restart: unless-stopped
+      finance.rag.enabled: "true"
 
 volumes:
   postgres-data:

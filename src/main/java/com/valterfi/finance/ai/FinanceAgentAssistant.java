@@ -5,7 +5,7 @@ import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.spring.AiService;
 
-@AiService(tools = { "transactionTools" })
+@AiService(contentRetriever = "contentRetriever", tools = { "transactionTools" })
 public interface FinanceAgentAssistant {
 
     @SystemMessage("""

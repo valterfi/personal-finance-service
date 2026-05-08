@@ -19,10 +19,12 @@ public class MessageService {
 
     private final MessageParser messageParser;
     private final TransactionRepository transactionRepository;
+    private final WhatsAppNotificationService notificationService;
 
     public void process(Message message) {
         try {
             String body = MessageUtils.extractBody(message);
+            notificationService.sendMessage(body);
             List<Transaction> transactions = messageParser.parseTransactions(body);
 
             for (Transaction transaction : transactions) {

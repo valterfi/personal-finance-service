@@ -2,12 +2,14 @@ FROM eclipse-temurin:21-jdk AS build
 
 WORKDIR /workspace
 
+ARG MAVEN_PROFILE=ollama
+
 COPY .mvn .mvn
 COPY mvnw pom.xml ./
-RUN ./mvnw -DskipTests dependency:go-offline
+RUN ./mvnw -P${MAVEN_PROFILE} -DskipTests dependency:go-offline
 
 COPY src src
-RUN ./mvnw -DskipTests package
+RUN ./mvnw -P${MAVEN_PROFILE} -DskipTests package
 
 FROM eclipse-temurin:21-jre
 

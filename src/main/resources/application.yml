@@ -36,6 +36,7 @@ twilio:
     account-sid: "${TWILIO_WHATSAPP_ACCOUNT_SID:}"
     auth-token: "${TWILIO_WHATSAPP_AUTH_TOKEN:}"
     from-number: "${TWILIO_WHATSAPP_FROM_NUMBER:}"
+    transaction-template-id: "${TWILIO_WHATSAPP_TRANSACTION_TEMPLATE_ID:}"
 
 finance:
   rag:
@@ -50,3 +51,7 @@ logging:
     org.springframework.web.client.DefaultRestClient: DEBUG
     dev.langchain4j: DEBUG
     com.twilio: DEBUG
+    org.apache.http: INFO
+    org.apache.http.headers: INFO
+    org.apache.http.impl.conn: INFO
+    org.apache.http.wire: INFO

@@ -24,11 +24,11 @@ public class MessageService {
     public void process(Message message) {
         try {
             String body = MessageUtils.extractBody(message);
-            notificationService.sendMessage(body);
             List<Transaction> transactions = messageParser.parseTransactions(body);
 
             for (Transaction transaction : transactions) {
                 log.info("Parsed transaction: {}", transaction);
+                notificationService.sendMessage(transaction);
             }
 
             if (transactions.isEmpty()) {

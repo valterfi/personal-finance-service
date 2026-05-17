@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.valterfi.finance.model.Transaction;
 import com.valterfi.finance.service.WhatsAppNotificationService;
 
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,12 @@ public class WhatsAppNotificationResource {
     public String sendTestMessage(@RequestBody String text) {
         notificationService.sendMessage(text);
         return "WhatsApp message sent.";
+    }
+
+    @PostMapping(value = "/test/transaction", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
+    public String sendTestTransactionMessage(@RequestBody Transaction transaction) {
+        notificationService.sendMessage(transaction);
+        return "WhatsApp transaction message sent.";
     }
 
 }

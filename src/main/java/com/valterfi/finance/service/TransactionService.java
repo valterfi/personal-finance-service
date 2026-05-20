@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.valterfi.finance.model.Transaction;
 import com.valterfi.finance.repository.TransactionRepository;
+import com.valterfi.finance.util.BrazilDateTime;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,7 +18,7 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
 
     public List<Transaction> findTodayTransactions() {
-        return findTransactionsByDate(LocalDate.now());
+        return findTransactionsByDate(BrazilDateTime.today());
     }
 
     public List<Transaction> findTransactionsByDate(LocalDate date) {

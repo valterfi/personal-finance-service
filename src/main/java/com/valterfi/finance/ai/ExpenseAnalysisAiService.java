@@ -23,7 +23,7 @@ public interface ExpenseAnalysisAiService {
             - Mention main merchants/categories
             - Mention unusual/high expenses
             - Give one practical suggestion
-            - Maximum 1600 characters
+            - Maximum 1500 characters
 
             Transaction summary:
             {{summary}}

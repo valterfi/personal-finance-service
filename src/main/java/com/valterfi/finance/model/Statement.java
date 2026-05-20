@@ -3,6 +3,8 @@ package com.valterfi.finance.model;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.valterfi.finance.util.BrazilDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -46,12 +48,12 @@ public class Statement {
 
     @PrePersist
     void onCreate() {
-        createdAt = LocalDateTime.now();
+        createdAt = BrazilDateTime.now();
         deleted = false;
     }
 
     @PreUpdate
     void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        updatedAt = BrazilDateTime.now();
     }
 }

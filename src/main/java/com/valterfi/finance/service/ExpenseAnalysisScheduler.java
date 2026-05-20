@@ -16,7 +16,7 @@ public class ExpenseAnalysisScheduler {
     private final ExpenseAnalysisService expenseAnalysisService;
     private final WhatsAppNotificationService notificationService;
 
-    @Scheduled(cron = "0 0 15,21 * * *", zone = "America/Sao_Paulo")
+    @Scheduled(cron = "0 0 15,22 * * *", zone = "America/Sao_Paulo")
     public void sendDailyAnalysis() {
         try {
             String analysis = expenseAnalysisService.analyzeTodayExpenses();

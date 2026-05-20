@@ -1,25 +1,41 @@
 package com.valterfi.finance.service;
 
+import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.valterfi.finance.config.TwilioWhatsAppProperties;
+import com.valterfi.finance.model.Transaction;
+import com.valterfi.finance.repository.TransactionRepository;
+import com.valterfi.finance.util.MessageUtils;
 
 import jakarta.mail.Message;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import com.valterfi.finance.model.Transaction;
-import com.valterfi.finance.repository.TransactionRepository;
-import com.valterfi.finance.util.MessageUtils;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class MessageService {
 
+    private static final Locale BRAZIL = Locale.forLanguageTag("pt-BR");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
+
     private final MessageParser messageParser;
     private final TransactionRepository transactionRepository;
     private final WhatsAppNotificationService notificationService;
+    private final TwilioWhatsAppProperties whatsAppProperties;
+    private final ObjectMapper objectMapper;
 
     public void process(Message message) {
         try {
@@ -28,7 +44,7 @@ public class MessageService {
 
             for (Transaction transaction : transactions) {
                 log.info("Parsed transaction: {}", transaction);
-                notificationService.sendMessage(transaction);
+                sendMessage(transaction);
             }
 
             if (transactions.isEmpty()) {
@@ -41,6 +57,38 @@ public class MessageService {
         } catch (Exception exception) {
             log.error("Failed to process message subject={}", MessageUtils.safeSubject(message), exception);
         }
+    }
+
+    private void sendMessage(Transaction transaction) {
+        validateTransactionTemplate();
+
+        String contentVariables = toContentVariables(transaction);
+        notificationService.sendMessage(whatsAppProperties.getTransactionTemplateId(), contentVariables);
+    }
+
+    private void validateTransactionTemplate() {
+        if (!StringUtils.hasText(whatsAppProperties.getTransactionTemplateId())) {
+            throw new IllegalStateException("Twilio WhatsApp transaction template id is missing. Configure twilio.whatsapp.transaction-template-id.");
+        }
+    }
+
+    private String toContentVariables(Transaction transaction) {
+        Map<String, String> variables = new LinkedHashMap<>();
+        variables.put("1", transaction.getCard());
+        variables.put("2", formatAmount(transaction.getAmount()));
+        variables.put("3", transaction.getDate().format(DATE_FORMATTER));
+        variables.put("4", transaction.getTime().format(TIME_FORMATTER));
+        variables.put("5", transaction.getDescription());
+
+        try {
+            return objectMapper.writeValueAsString(variables);
+        } catch (JsonProcessingException exception) {
+            throw new IllegalStateException("Failed to serialize Twilio WhatsApp template variables.", exception);
+        }
+    }
+
+    private String formatAmount(BigDecimal amount) {
+        return NumberFormat.getCurrencyInstance(BRAZIL).format(amount);
     }
 
 }

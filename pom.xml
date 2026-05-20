@@ -118,7 +118,7 @@
 		</profile>
 
 		<profile>
-			<id>openapi</id>
+			<id>openai</id>
 			<dependencies>
 				<dependency>
 					<groupId>dev.langchain4j</groupId>

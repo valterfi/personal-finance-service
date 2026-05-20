@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.valterfi.finance.ai.ExpenseAnalysisAiService;
 import com.valterfi.finance.model.Transaction;
 import com.valterfi.finance.repository.TransactionRepository;
+import com.valterfi.finance.util.BrazilDateTime;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,7 @@ public class ExpenseAnalysisService {
     private final ExpenseAnalysisAiService expenseAnalysisAiService;
 
     public String analyzeTodayExpenses() {
-        LocalDate currentDate = LocalDate.now();
+        LocalDate currentDate = BrazilDateTime.today();
         List<Transaction> transactions = transactionRepository.findByDateAndDeletedFalse(currentDate);
         String summary = buildCurrentDateSummary(currentDate, transactions);
 

@@ -46,7 +46,7 @@ finance:
     max-overlap-size: 200
   expense-analysis:
     scheduler:
-      enabled: false
+      enabled: true
 
 logging:
   level:

@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 
 import com.valterfi.finance.config.FinanceStatementProperties;
 import com.valterfi.finance.model.Statement;
+import com.valterfi.finance.model.Transaction;
 import com.valterfi.finance.repository.StatementRepository;
+import com.valterfi.finance.util.BrazilDateTime;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +46,25 @@ public class StatementService {
                     log.debug("No statement found for transactionDate={}. Creating statement range.", transactionDate);
                     return createStatementFor(transactionDate);
                 });
+    }
+
+    public Statement incrementCurrentBalance(Transaction transaction) {
+        Statement statement = transaction.getStatement();
+        BigDecimal currentBalance = statement.getCurrentBalance() == null
+                ? BigDecimal.ZERO
+                : statement.getCurrentBalance();
+        BigDecimal newCurrentBalance = currentBalance.add(transaction.getAmount());
+
+        statement.setCurrentBalance(newCurrentBalance);
+        statement.setUpdatedAt(BrazilDateTime.now());
+
+        Statement savedStatement = statementRepository.save(statement);
+        log.info("Updated statement balance id={} transactionId={} transactionAmount={} currentBalance={}",
+                savedStatement.getId(),
+                transaction.getId(),
+                transaction.getAmount(),
+                savedStatement.getCurrentBalance());
+        return savedStatement;
     }
 
     private Statement createStatementFor(LocalDate transactionDate) {

@@ -69,6 +69,7 @@ class MessageServiceTest {
         Assertions.assertEquals(LocalDate.of(2026, 5, 25), statementService.transactionDate);
         Assertions.assertSame(statement, savedTransaction.getStatement());
         Assertions.assertEquals(123L, savedTransaction.getId());
+        Assertions.assertSame(savedTransaction, statementService.balanceTransaction);
     }
 
     @Test
@@ -81,6 +82,7 @@ class MessageServiceTest {
 
         Assertions.assertEquals(body, messageParser.body);
         Assertions.assertNull(statementService.transactionDate);
+        Assertions.assertNull(statementService.balanceTransaction);
         Assertions.assertNull(notificationService.contentSid);
         Assertions.assertNull(savedTransaction);
     }
@@ -144,6 +146,7 @@ class MessageServiceTest {
     private static class StubStatementService extends StatementService {
 
         private LocalDate transactionDate;
+        private Transaction balanceTransaction;
         private Statement statement;
 
         private StubStatementService() {
@@ -154,6 +157,12 @@ class MessageServiceTest {
         public Statement findOrCreateStatementFor(LocalDate transactionDate) {
             this.transactionDate = transactionDate;
             return statement;
+        }
+
+        @Override
+        public Statement incrementCurrentBalance(Transaction transaction) {
+            this.balanceTransaction = transaction;
+            return transaction.getStatement();
         }
     }
 

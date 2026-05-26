@@ -53,6 +53,7 @@ public class MessageService {
             transaction.setStatement(statementService.findOrCreateStatementFor(transaction.getDate()));
             Transaction savedTransaction = transactionRepository.save(transaction);
             log.info("Persisted transaction id={}", savedTransaction.getId());
+            statementService.incrementCurrentBalance(savedTransaction);
         } catch (Exception exception) {
             log.error("Failed to process message subject={}", MessageUtils.safeSubject(message), exception);
         }

@@ -1,6 +1,7 @@
 package com.valterfi.finance.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.lang.reflect.Proxy;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import com.valterfi.finance.config.FinanceStatementProperties;
 import com.valterfi.finance.model.Statement;
+import com.valterfi.finance.model.Transaction;
 import com.valterfi.finance.repository.StatementRepository;
 
 class StatementServiceTest {
@@ -94,6 +96,47 @@ class StatementServiceTest {
         assertEquals(LocalDate.of(2026, 6, 1), result.getReferenceMonth());
         assertEquals(LocalDate.of(2026, 5, 30), result.getStartDate());
         assertEquals(LocalDate.of(2026, 6, 26), result.getClosingDate());
+    }
+
+    @Test
+    void shouldIncrementStatementCurrentBalanceWithTransactionAmount() {
+        Statement statement = statement(
+                1L,
+                LocalDate.of(2026, 5, 1),
+                LocalDate.of(2026, 5, 1),
+                LocalDate.of(2026, 5, 29));
+        statement.setCurrentBalance(new BigDecimal("100.00"));
+
+        Transaction transaction = new Transaction();
+        transaction.setId(10L);
+        transaction.setAmount(new BigDecimal("202.44"));
+        transaction.setStatement(statement);
+
+        Statement result = statementService.incrementCurrentBalance(transaction);
+
+        assertSame(statement, result);
+        assertEquals(new BigDecimal("302.44"), result.getCurrentBalance());
+        assertNotNull(result.getUpdatedAt());
+        assertEquals(1, savedStatements.size());
+    }
+
+    @Test
+    void shouldIncrementStatementCurrentBalanceWhenCurrentBalanceIsNull() {
+        Statement statement = statement(
+                1L,
+                LocalDate.of(2026, 5, 1),
+                LocalDate.of(2026, 5, 1),
+                LocalDate.of(2026, 5, 29));
+
+        Transaction transaction = new Transaction();
+        transaction.setId(10L);
+        transaction.setAmount(new BigDecimal("202.44"));
+        transaction.setStatement(statement);
+
+        Statement result = statementService.incrementCurrentBalance(transaction);
+
+        assertEquals(new BigDecimal("202.44"), result.getCurrentBalance());
+        assertNotNull(result.getUpdatedAt());
     }
 
     private Statement statement(Long id, LocalDate referenceMonth, LocalDate startDate, LocalDate closingDate) {

@@ -104,6 +104,15 @@ public class TransactionNotificationService {
         }
     }
 
+    /**
+     * Resolves the spending pace classification used by the transaction insight WhatsApp template.
+     * <p>
+     * The current statement balance is compared with the expected spending for the transaction date:
+     * {@code difference = currentBalance - expectedSpendingToday}. Spending at or below the expected
+     * pace is {@code BOM}. Spending above the expected pace is {@code ATENCAO} while the excess is up
+     * to 10% of the monthly target, and {@code ALTO} when it is above that threshold. If the current
+     * balance already reached the statement target, the insight is {@code CRITICO}.
+     */
     private SpendingPaceInsight resolveSpendingPaceInsight(
             BigDecimal currentBalance,
             BigDecimal targetBalance,

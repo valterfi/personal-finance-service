@@ -10,6 +10,8 @@ import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.valterfi.finance.config.FinanceTransactionInsightProperties;
@@ -17,12 +19,12 @@ import com.valterfi.finance.config.TwilioWhatsAppProperties;
 import com.valterfi.finance.model.Statement;
 import com.valterfi.finance.model.Transaction;
 
-class TransactionWhatsAppNotificationServiceTest {
+class TransactionNotificationServiceTest {
 
     private StubWhatsAppNotificationService notificationService;
     private TwilioWhatsAppProperties whatsAppProperties;
     private FinanceTransactionInsightProperties transactionInsightProperties;
-    private TransactionNotificationService transactionWhatsAppNotificationService;
+    private TransactionNotificationService transactionNotificationService;
 
     @BeforeEach
     void setUp() {
@@ -31,7 +33,7 @@ class TransactionWhatsAppNotificationServiceTest {
         whatsAppProperties.setTransactionTemplateId("HX_TRANSACTION_TEMPLATE");
         whatsAppProperties.setTransactionInsightTemplateId("HX_TRANSACTION_INSIGHT_TEMPLATE");
         transactionInsightProperties = new FinanceTransactionInsightProperties();
-        transactionWhatsAppNotificationService = new TransactionNotificationService(
+        transactionNotificationService = new TransactionNotificationService(
                 notificationService,
                 whatsAppProperties,
                 transactionInsightProperties,
@@ -42,7 +44,7 @@ class TransactionWhatsAppNotificationServiceTest {
     void shouldSendTransactionMessage() throws Exception {
         Transaction transaction = transaction();
 
-        transactionWhatsAppNotificationService.sendMessage(transaction);
+        transactionNotificationService.sendMessage(transaction);
 
         MessageRequest message = notificationService.messages.getFirst();
         Map<?, ?> variables = new ObjectMapper().readValue(message.contentVariables(), Map.class);
@@ -64,7 +66,7 @@ class TransactionWhatsAppNotificationServiceTest {
         transaction.setStatement(statement(new BigDecimal("5200.00")));
         transactionInsightProperties.setEnabled(true);
 
-        transactionWhatsAppNotificationService.sendInsightMessage(transaction, new BigDecimal("4666.67"));
+        transactionNotificationService.sendInsightMessage(transaction, new BigDecimal("4666.67"));
 
         MessageRequest insightMessage = notificationService.messages.getFirst();
         Map<?, ?> variables = new ObjectMapper().readValue(insightMessage.contentVariables(), Map.class);
@@ -90,9 +92,37 @@ class TransactionWhatsAppNotificationServiceTest {
         Transaction transaction = transaction();
         transaction.setStatement(statement(new BigDecimal("5200.00")));
 
-        transactionWhatsAppNotificationService.sendInsightMessage(transaction, new BigDecimal("4666.67"));
+        transactionNotificationService.sendInsightMessage(transaction, new BigDecimal("4666.67"));
 
         Assertions.assertTrue(notificationService.messages.isEmpty());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "4000.00, 14000.00, 4666.67, 🟢, BOM",
+            "4666.67, 14000.00, 4666.67, 🟢, BOM",
+            "5200.00, 14000.00, 4666.67, 🟡, ATENÇÃO",
+            "6200.00, 14000.00, 4666.67, 🔴, ALTO",
+            "14000.00, 14000.00, 4666.67, 🚨, CRÍTICO",
+            "15000.00, 14000.00, 4666.67, 🚨, CRÍTICO",
+            "-1.00, 0.00, -2.00, 🚨, CRÍTICO"
+    })
+    void shouldResolveAllSpendingPaceInsightCombinations(
+            BigDecimal currentBalance,
+            BigDecimal targetBalance,
+            BigDecimal expectedSpendingToday,
+            String expectedEmoji,
+            String expectedLabel) throws Exception {
+        Transaction transaction = transaction();
+        transaction.setStatement(statement(currentBalance, targetBalance));
+        transactionInsightProperties.setEnabled(true);
+
+        transactionNotificationService.sendInsightMessage(transaction, expectedSpendingToday);
+
+        MessageRequest insightMessage = notificationService.messages.getFirst();
+        Map<?, ?> variables = new ObjectMapper().readValue(insightMessage.contentVariables(), Map.class);
+        Assertions.assertEquals(expectedEmoji, variables.get("1"));
+        Assertions.assertEquals(expectedLabel, variables.get("2"));
     }
 
     private Transaction transaction() {
@@ -106,8 +136,12 @@ class TransactionWhatsAppNotificationServiceTest {
     }
 
     private Statement statement(BigDecimal currentBalance) {
+        return statement(currentBalance, new BigDecimal("14000.00"));
+    }
+
+    private Statement statement(BigDecimal currentBalance, BigDecimal targetBalance) {
         Statement statement = new Statement();
-        statement.setTargetStatementBalance(new BigDecimal("14000.00"));
+        statement.setTargetStatementBalance(targetBalance);
         statement.setCurrentBalance(currentBalance);
         return statement;
     }

@@ -32,6 +32,7 @@ public class MessageService {
 
     private final MessageParser messageParser;
     private final TransactionRepository transactionRepository;
+    private final StatementService statementService;
     private final WhatsAppNotificationService notificationService;
     private final TwilioWhatsAppProperties whatsAppProperties;
     private final ObjectMapper objectMapper;
@@ -49,6 +50,7 @@ public class MessageService {
             log.info("Parsed transaction: {}", transaction);
             sendMessage(transaction);
 
+            transaction.setStatement(statementService.findOrCreateStatementFor(transaction.getDate()));
             Transaction savedTransaction = transactionRepository.save(transaction);
             log.info("Persisted transaction id={}", savedTransaction.getId());
         } catch (Exception exception) {

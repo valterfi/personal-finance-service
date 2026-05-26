@@ -40,6 +40,8 @@ twilio:
     daily-analysis-template-id: "${TWILIO_WHATSAPP_DAILY_ANALYSIS_TEMPLATE_ID:}"
 
 finance:
+  statement:
+    target-statement-balance: 14000
   rag:
     enabled: true
     path: "rag"
@@ -52,6 +54,7 @@ finance:
 logging:
   level:
     root: INFO
+    com.valterfi.finance: DEBUG
     org.springframework.web.client.DefaultRestClient: DEBUG
     dev.langchain4j: DEBUG
     com.twilio: DEBUG

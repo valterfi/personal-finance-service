@@ -62,6 +62,7 @@ public class Statement {
     @PrePersist
     void onCreate() {
         createdAt = BrazilDateTime.now();
+        updatedAt = createdAt;
         deleted = false;
     }
 

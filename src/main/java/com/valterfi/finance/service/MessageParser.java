@@ -3,8 +3,6 @@ package com.valterfi.finance.service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,20 +21,19 @@ public class MessageParser {
                     + "no\\s+valor\\s+de\\s+R\\$\\s+(?<amount>\\d+[\\.,]\\d{2}),\\s+dia\\s+(?<purchaseDate>\\d{2}/\\d{2}/\\d{4})\\s+às\\s+(?<time>\\d{2}:\\d{2}),\\s+"
                     + "em\\s+(?<description>.*?),\\s+foi\\s+aprovada\\.?");
 
-    public List<Transaction> parseTransactions(String body) {
+    public Transaction parseTransactions(String body) {
         Matcher matcher = TRANSACTION_PATTERN.matcher(body);
-        List<Transaction> transactions = new ArrayList<>();
 
-        while (matcher.find()) {
-            Transaction transaction = new Transaction();
-            transaction.setDate(LocalDate.parse(matcher.group("purchaseDate"), DATE_FORMATTER));
-            transaction.setTime(LocalTime.parse(matcher.group("time"), TIME_FORMATTER));
-            transaction.setDescription(MessageUtils.normalizeWhitespace(matcher.group("description")));
-            transaction.setAmount(MessageUtils.parseAmount(matcher.group("amount")));
-            transaction.setCard(matcher.group("card"));
-            transactions.add(transaction);
+        if (!matcher.find()) {
+            return null;
         }
 
-        return transactions;
+        Transaction transaction = new Transaction();
+        transaction.setDate(LocalDate.parse(matcher.group("purchaseDate"), DATE_FORMATTER));
+        transaction.setTime(LocalTime.parse(matcher.group("time"), TIME_FORMATTER));
+        transaction.setDescription(MessageUtils.normalizeWhitespace(matcher.group("description")));
+        transaction.setAmount(MessageUtils.parseAmount(matcher.group("amount")));
+        transaction.setCard(matcher.group("card"));
+        return transaction;
     }
 }

@@ -3,3 +3,5 @@ databaseChangeLog:
       file: db/changelog/changes/001-create-statement-table.yml
   - include:
       file: db/changelog/changes/002-create-transaction-table.yml
+  - include:
+      file: db/changelog/changes/003-add-statement-balance-columns.yml

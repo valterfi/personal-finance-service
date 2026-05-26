@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -40,20 +39,18 @@ public class MessageService {
     public void process(Message message) {
         try {
             String body = MessageUtils.extractBody(message);
-            List<Transaction> transactions = messageParser.parseTransactions(body);
+            Transaction transaction = messageParser.parseTransactions(body);
 
-            for (Transaction transaction : transactions) {
-                log.info("Parsed transaction: {}", transaction);
-                sendMessage(transaction);
-            }
-
-            if (transactions.isEmpty()) {
+            if (transaction == null) {
                 log.info("No transaction pattern matched for message subject={}", message.getSubject());
                 return;
             }
 
-            List<Transaction> savedTransactions = transactionRepository.saveAll(transactions);
-            log.info("Persisted {} transactions", savedTransactions.size());
+            log.info("Parsed transaction: {}", transaction);
+            sendMessage(transaction);
+
+            Transaction savedTransaction = transactionRepository.save(transaction);
+            log.info("Persisted transaction id={}", savedTransaction.getId());
         } catch (Exception exception) {
             log.error("Failed to process message subject={}", MessageUtils.safeSubject(message), exception);
         }

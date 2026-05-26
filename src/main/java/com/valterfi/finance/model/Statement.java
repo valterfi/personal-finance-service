@@ -1,5 +1,6 @@
 package com.valterfi.finance.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -33,6 +34,18 @@ public class Statement {
 
     @Column(name = "closing_date")
     private LocalDate closingDate;
+
+    @Column(name = "start_date")
+    private LocalDate startDate;
+
+    @Column(name = "current_balance", precision = 19, scale = 2)
+    private BigDecimal currentBalance;
+
+    @Column(name = "statement_balance", precision = 19, scale = 2)
+    private BigDecimal statementBalance;
+
+    @Column(name = "target_statement_balance", precision = 19, scale = 2)
+    private BigDecimal targetStatementBalance;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

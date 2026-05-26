@@ -1,12 +1,11 @@
 package com.valterfi.finance.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -29,37 +28,27 @@ class MessageParserTest {
     private final MessageParser messageParser = new MessageParser();
 
     @Test
-    void shouldParseAllTransactionsFromSampleBody() {
-        List<Transaction> transactions = messageParser.parseTransactions(SAMPLE_BODY);
+    void shouldParseFirstTransactionFromSampleBody() {
+        Transaction transaction = messageParser.parseTransactions(SAMPLE_BODY);
 
-        assertEquals(7, transactions.size());
-    }
-
-    @Test
-    void shouldParseLastTransactionFieldsFromSampleBody() {
-        List<Transaction> transactions = messageParser.parseTransactions(SAMPLE_BODY);
-        Transaction transaction = transactions.getLast();
-
-        assertEquals(LocalDate.of(2026, 4, 18), transaction.getDate());
-        assertEquals(LocalTime.of(13, 59), transaction.getTime());
-        assertEquals("CARREFOUR TTE 43 SAO PAULO BRA", transaction.getDescription());
-        assertEquals(new BigDecimal("1202.44"), transaction.getAmount());
+        assertEquals(LocalDate.of(2026, 4, 16), transaction.getDate());
+        assertEquals(LocalTime.of(8, 16), transaction.getTime());
+        assertEquals("DL*UberRides Sao Paulo BRA", transaction.getDescription());
+        assertEquals(new BigDecimal("32.98"), transaction.getAmount());
         assertEquals("7396", transaction.getCard());
     }
 
     @Test
-    void shouldReturnEmptyListWhenBodyDoesNotMatchPattern() {
-        List<Transaction> transactions = messageParser.parseTransactions("random content");
+    void shouldReturnNullWhenBodyDoesNotMatchPattern() {
+        Transaction transaction = messageParser.parseTransactions("random content");
 
-        assertTrue(transactions.isEmpty());
+        assertNull(transaction);
     }
 
     @Test
     void shouldParseTransactionWhenMessageContainsIrregularSpaces() {
-        List<Transaction> transactions = messageParser.parseTransactions(SAMPLE_BODY_WITH_EXTRA_SPACES);
-        Transaction transaction = transactions.getFirst();
+        Transaction transaction = messageParser.parseTransactions(SAMPLE_BODY_WITH_EXTRA_SPACES);
 
-        assertEquals(1, transactions.size());
         assertEquals(LocalDate.of(2026, 4, 21), transaction.getDate());
         assertEquals(LocalTime.of(13, 38), transaction.getTime());
         assertEquals("SAMS RADIAL 4918 SAO PAULO BRA", transaction.getDescription());

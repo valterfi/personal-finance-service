@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-add-statement-balance-columns
+      author: codex
+      changes:
+        - addColumn:
+            tableName: statement
+            columns:
+              - column:
+                  name: start_date
+                  type: DATE
+              - column:
+                  name: current_balance
+                  type: DECIMAL(19, 2)
+              - column:
+                  name: statement_balance
+                  type: DECIMAL(19, 2)
+              - column:
+                  name: target_statement_balance
+                  type: DECIMAL(19, 2)

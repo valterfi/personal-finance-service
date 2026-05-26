@@ -37,11 +37,14 @@ twilio:
     auth-token: "${TWILIO_WHATSAPP_AUTH_TOKEN:}"
     from-number: "${TWILIO_WHATSAPP_FROM_NUMBER:}"
     transaction-template-id: "${TWILIO_WHATSAPP_TRANSACTION_TEMPLATE_ID:}"
+    transaction-insight-template-id: "${TWILIO_WHATSAPP_TRANSACTION_INSIGHT_TEMPLATE_ID:}"
     daily-analysis-template-id: "${TWILIO_WHATSAPP_DAILY_ANALYSIS_TEMPLATE_ID:}"
 
 finance:
   statement:
     target-statement-balance: 14000
+  transaction-insight:
+    enabled: false
   rag:
     enabled: true
     path: "rag"

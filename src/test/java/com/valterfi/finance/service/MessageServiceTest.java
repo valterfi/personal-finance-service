@@ -26,6 +26,7 @@ class MessageServiceTest {
 
     private StubMessageParser messageParser;
     private StubStatementService statementService;
+    private StubSpendingPaceService spendingPaceService;
     private StubWhatsAppNotificationService notificationService;
     private TransactionRepository transactionRepository;
     private Transaction savedTransaction;
@@ -36,6 +37,7 @@ class MessageServiceTest {
     void setUp() {
         messageParser = new StubMessageParser();
         statementService = new StubStatementService();
+        spendingPaceService = new StubSpendingPaceService();
         notificationService = new StubWhatsAppNotificationService();
         transactionRepository = transactionRepository();
 
@@ -45,6 +47,7 @@ class MessageServiceTest {
                 messageParser,
                 transactionRepository,
                 statementService,
+                spendingPaceService,
                 notificationService,
                 whatsAppProperties,
                 new ObjectMapper());
@@ -56,6 +59,10 @@ class MessageServiceTest {
         Transaction transaction = transaction();
         Statement statement = new Statement();
         statement.setId(99L);
+        statement.setStartDate(LocalDate.of(2026, 5, 16));
+        statement.setClosingDate(LocalDate.of(2026, 6, 14));
+        statement.setTargetStatementBalance(new BigDecimal("14000.00"));
+        statement.setCurrentBalance(new BigDecimal("202.44"));
 
         MimeMessage message = mimeMessage(body);
         messageParser.transaction = transaction;
@@ -70,6 +77,8 @@ class MessageServiceTest {
         Assertions.assertSame(statement, savedTransaction.getStatement());
         Assertions.assertEquals(123L, savedTransaction.getId());
         Assertions.assertSame(savedTransaction, statementService.balanceTransaction);
+        Assertions.assertSame(savedTransaction, spendingPaceService.transaction);
+        Assertions.assertSame(statement, spendingPaceService.statement);
     }
 
     @Test
@@ -83,6 +92,7 @@ class MessageServiceTest {
         Assertions.assertEquals(body, messageParser.body);
         Assertions.assertNull(statementService.transactionDate);
         Assertions.assertNull(statementService.balanceTransaction);
+        Assertions.assertNull(spendingPaceService.transaction);
         Assertions.assertNull(notificationService.contentSid);
         Assertions.assertNull(savedTransaction);
     }
@@ -148,6 +158,7 @@ class MessageServiceTest {
         private LocalDate transactionDate;
         private Transaction balanceTransaction;
         private Statement statement;
+        private Statement incrementedStatement;
 
         private StubStatementService() {
             super(null, new FinanceStatementProperties());
@@ -162,7 +173,20 @@ class MessageServiceTest {
         @Override
         public Statement incrementCurrentBalance(Transaction transaction) {
             this.balanceTransaction = transaction;
-            return transaction.getStatement();
+            return incrementedStatement == null ? transaction.getStatement() : incrementedStatement;
+        }
+    }
+
+    private static class StubSpendingPaceService extends SpendingPaceService {
+
+        private Transaction transaction;
+        private Statement statement;
+
+        @Override
+        public BigDecimal evaluate(Transaction transaction, Statement statement) {
+            this.transaction = transaction;
+            this.statement = statement;
+            return BigDecimal.ZERO;
         }
     }
 

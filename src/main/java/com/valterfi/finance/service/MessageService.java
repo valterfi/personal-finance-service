@@ -13,6 +13,7 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.valterfi.finance.config.TwilioWhatsAppProperties;
+import com.valterfi.finance.model.Statement;
 import com.valterfi.finance.model.Transaction;
 import com.valterfi.finance.repository.TransactionRepository;
 import com.valterfi.finance.util.MessageUtils;
@@ -33,6 +34,7 @@ public class MessageService {
     private final MessageParser messageParser;
     private final TransactionRepository transactionRepository;
     private final StatementService statementService;
+    private final SpendingPaceService spendingPaceService;
     private final WhatsAppNotificationService notificationService;
     private final TwilioWhatsAppProperties whatsAppProperties;
     private final ObjectMapper objectMapper;
@@ -53,7 +55,8 @@ public class MessageService {
             transaction.setStatement(statementService.findOrCreateStatementFor(transaction.getDate()));
             Transaction savedTransaction = transactionRepository.save(transaction);
             log.info("Persisted transaction id={}", savedTransaction.getId());
-            statementService.incrementCurrentBalance(savedTransaction);
+            Statement updatedStatement = statementService.incrementCurrentBalance(savedTransaction);
+            spendingPaceService.evaluate(savedTransaction, updatedStatement);
         } catch (Exception exception) {
             log.error("Failed to process message subject={}", MessageUtils.safeSubject(message), exception);
         }

@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class WhatsAppNotificationService {
+public class TwilioService {
 
     private static final String WHATSAPP_PREFIX = "whatsapp:";
 

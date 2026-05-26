@@ -26,7 +26,7 @@ public class ExpenseAnalysisScheduler {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final ExpenseAnalysisService expenseAnalysisService;
-    private final WhatsAppNotificationService notificationService;
+    private final TwilioService notificationService;
     private final TwilioWhatsAppProperties whatsAppProperties;
     private final ObjectMapper objectMapper;
 

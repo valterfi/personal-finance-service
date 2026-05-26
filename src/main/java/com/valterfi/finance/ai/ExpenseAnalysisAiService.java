@@ -24,6 +24,9 @@ public interface ExpenseAnalysisAiService {
             - Mention unusual/high expenses
             - Give one practical suggestion
             - Maximum 1500 characters
+            - The response will be used as a Twilio WhatsApp ContentVariables value, so it must be a single line
+            - Do not include line breaks, tabs, or more than four consecutive spaces
+            - Do not return an empty response
 
             Transaction summary:
             {{summary}}

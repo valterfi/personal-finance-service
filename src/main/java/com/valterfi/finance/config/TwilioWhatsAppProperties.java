@@ -17,6 +17,7 @@ public class TwilioWhatsAppProperties {
     private String authToken;
     private String fromNumber;
     private String transactionTemplateId;
+    private String dailyAnalysisTemplateId;
     private List<String> toNumbers = new ArrayList<>();
 
 }

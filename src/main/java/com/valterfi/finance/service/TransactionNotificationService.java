@@ -3,7 +3,9 @@ package com.valterfi.finance.service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -93,9 +95,9 @@ public class TransactionNotificationService {
         variables.put("1", insight.emoji());
         variables.put("2", insight.label());
         variables.put("3", purchaseSummary(transaction));
-        variables.put("4", formatWholeAmount(currentBalance));
-        variables.put("5", formatWholeAmount(targetBalance));
-        variables.put("6", jamesSummary(difference, currentBalance, targetBalance));
+        variables.put("4", bold(formatWholeAmount(currentBalance)));
+        variables.put("5", bold(formatWholeAmount(targetBalance)));
+        variables.put("6", jamesSummary(difference, currentBalance, targetBalance, transaction.getDate(), statement));
 
         try {
             return objectMapper.writeValueAsString(variables);
@@ -136,37 +138,62 @@ public class TransactionNotificationService {
 
     private String purchaseSummary(Transaction transaction) {
         return "no cartão final "
-                + transaction.getCard()
+                + bold(transaction.getCard())
                 + ", no valor de "
-                + formatAmount(transaction.getAmount())
+                + bold(formatAmount(transaction.getAmount()))
                 + ", em "
-                + transaction.getDate().format(DATE_FORMATTER)
+                + bold(transaction.getDate().format(DATE_FORMATTER))
                 + " às "
-                + transaction.getTime().format(TIME_FORMATTER)
+                + bold(transaction.getTime().format(TIME_FORMATTER))
                 + ", em "
-                + transaction.getDescription()
+                + bold(transaction.getDescription())
                 + ", foi aprovada";
     }
 
-    private String jamesSummary(BigDecimal difference, BigDecimal currentBalance, BigDecimal targetBalance) {
+    private String jamesSummary(
+            BigDecimal difference,
+            BigDecimal currentBalance,
+            BigDecimal targetBalance,
+            LocalDate transactionDate,
+            Statement statement) {
         String targetSummary = targetSummary(currentBalance, targetBalance);
+        String dailyPaceSummary = dailyPaceSummary(currentBalance, targetBalance, transactionDate, statement);
 
         if (difference.signum() > 0) {
-            return "Você está " + formatWholeAmount(difference) + " acima do esperado hoje" + targetSummary;
+            return "Você está " + bold(formatWholeAmount(difference)) + " acima do esperado hoje. " + targetSummary + ". " + dailyPaceSummary;
         }
         if (difference.signum() < 0) {
-            return "Você está " + formatWholeAmount(difference.abs()) + " abaixo do esperado hoje" + targetSummary;
+            return "Você está " + bold(formatWholeAmount(difference.abs())) + " abaixo do esperado hoje. " + targetSummary + ". " + dailyPaceSummary;
         }
-        return "Você está dentro do esperado hoje." + targetSummary;
+        return "Você está dentro do esperado hoje. " + targetSummary + ". " + dailyPaceSummary;
     }
 
     private String targetSummary(BigDecimal currentBalance, BigDecimal targetBalance) {
         if (currentBalance.compareTo(targetBalance) > 0) {
-            return " Você ultrapassou a meta do ciclo em " + formatWholeAmount(currentBalance.subtract(targetBalance));
+            return "Você ultrapassou a meta do ciclo em " + bold(formatWholeAmount(currentBalance.subtract(targetBalance)));
         }
 
         BigDecimal missingToTarget = targetBalance.subtract(currentBalance);
-        return " Faltam apenas " + formatWholeAmount(missingToTarget) + " para atingir a meta do ciclo";
+        return "Faltam apenas " + bold(formatWholeAmount(missingToTarget)) + " para atingir a meta do ciclo";
+    }
+
+    private String dailyPaceSummary(
+            BigDecimal currentBalance,
+            BigDecimal targetBalance,
+            LocalDate transactionDate,
+            Statement statement) {
+        long currentCycleDay = Math.max(1, ChronoUnit.DAYS.between(statement.getStartDate(), transactionDate) + 1);
+        long remainingCycleDays = Math.max(0, ChronoUnit.DAYS.between(transactionDate, statement.getClosingDate()));
+        BigDecimal missingToTarget = targetBalance.subtract(currentBalance).max(BigDecimal.ZERO);
+        BigDecimal averageDailySpending = currentBalance.divide(BigDecimal.valueOf(currentCycleDay), 0, RoundingMode.HALF_UP);
+        BigDecimal recommendedDailyLimit = remainingCycleDays == 0
+                ? BigDecimal.ZERO
+                : missingToTarget.divide(BigDecimal.valueOf(remainingCycleDays), 0, RoundingMode.HALF_UP);
+
+        return "Você está gastando em média "
+                + bold(formatWholeAmount(averageDailySpending) + "/dia")
+                + " no ciclo. Para terminar dentro da meta, o ideal agora é manter os próximos dias em até "
+                + bold(formatWholeAmount(recommendedDailyLimit) + "/dia");
     }
 
     private String formatAmount(BigDecimal amount) {
@@ -178,6 +205,10 @@ public class TransactionNotificationService {
         numberFormat.setMinimumFractionDigits(0);
         numberFormat.setMaximumFractionDigits(0);
         return numberFormat.format(amount.setScale(0, RoundingMode.HALF_UP));
+    }
+
+    private String bold(String value) {
+        return "*" + value + "*";
     }
 
     private record SpendingPaceInsight(String emoji, String label) {

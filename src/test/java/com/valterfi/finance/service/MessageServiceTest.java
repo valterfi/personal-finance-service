@@ -27,7 +27,7 @@ class MessageServiceTest {
     private StubMessageParser messageParser;
     private StubStatementService statementService;
     private StubSpendingPaceService spendingPaceService;
-    private StubTransactionWhatsAppNotificationService transactionWhatsAppNotificationService;
+    private StubTransactionNotificationService transactionNotificationService;
     private TransactionRepository transactionRepository;
     private Transaction savedTransaction;
 
@@ -38,7 +38,7 @@ class MessageServiceTest {
         messageParser = new StubMessageParser();
         statementService = new StubStatementService();
         spendingPaceService = new StubSpendingPaceService();
-        transactionWhatsAppNotificationService = new StubTransactionWhatsAppNotificationService();
+        transactionNotificationService = new StubTransactionNotificationService();
         transactionRepository = transactionRepository();
 
         messageService = new MessageService(
@@ -46,7 +46,7 @@ class MessageServiceTest {
                 transactionRepository,
                 statementService,
                 spendingPaceService,
-                transactionWhatsAppNotificationService);
+                transactionNotificationService);
     }
 
     @Test
@@ -67,14 +67,14 @@ class MessageServiceTest {
         messageService.process(message);
 
         Assertions.assertEquals(body, messageParser.body);
-        Assertions.assertSame(transaction, transactionWhatsAppNotificationService.transactionMessage);
+        Assertions.assertNull(transactionNotificationService.transactionMessage);
         Assertions.assertEquals(LocalDate.of(2026, 5, 25), statementService.transactionDate);
         Assertions.assertSame(statement, savedTransaction.getStatement());
         Assertions.assertEquals(123L, savedTransaction.getId());
         Assertions.assertSame(savedTransaction, statementService.balanceTransaction);
         Assertions.assertSame(savedTransaction, spendingPaceService.transaction);
         Assertions.assertSame(statement, spendingPaceService.statement);
-        Assertions.assertSame(savedTransaction, transactionWhatsAppNotificationService.insightTransaction);
+        Assertions.assertSame(savedTransaction, transactionNotificationService.insightTransaction);
     }
 
     @Test
@@ -89,8 +89,8 @@ class MessageServiceTest {
         Assertions.assertNull(statementService.transactionDate);
         Assertions.assertNull(statementService.balanceTransaction);
         Assertions.assertNull(spendingPaceService.transaction);
-        Assertions.assertNull(transactionWhatsAppNotificationService.transactionMessage);
-        Assertions.assertNull(transactionWhatsAppNotificationService.insightTransaction);
+        Assertions.assertNull(transactionNotificationService.transactionMessage);
+        Assertions.assertNull(transactionNotificationService.insightTransaction);
         Assertions.assertNull(savedTransaction);
     }
 
@@ -188,13 +188,13 @@ class MessageServiceTest {
         }
     }
 
-    private static class StubTransactionWhatsAppNotificationService extends TransactionNotificationService {
+    private static class StubTransactionNotificationService extends TransactionNotificationService {
 
         private Transaction transactionMessage;
         private Transaction insightTransaction;
         private BigDecimal expectedSpendingToday;
 
-        private StubTransactionWhatsAppNotificationService() {
+        private StubTransactionNotificationService() {
             super(
                     new TwilioService(new TwilioWhatsAppProperties()),
                     new TwilioWhatsAppProperties(),

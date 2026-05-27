@@ -22,7 +22,7 @@ public class MessageService {
     private final TransactionRepository transactionRepository;
     private final StatementService statementService;
     private final SpendingPaceService spendingPaceService;
-    private final TransactionNotificationService transactionWhatsAppNotificationService;
+    private final TransactionNotificationService transactionNotificationService;
 
     public void process(Message message) {
         try {
@@ -35,7 +35,6 @@ public class MessageService {
             }
 
             log.info("Parsed transaction: {}", transaction);
-            transactionWhatsAppNotificationService.sendMessage(transaction);
 
             transaction.setStatement(statementService.findOrCreateStatementFor(transaction.getDate()));
             Transaction savedTransaction = transactionRepository.save(transaction);
@@ -43,7 +42,7 @@ public class MessageService {
             Statement updatedStatement = statementService.incrementCurrentBalance(savedTransaction);
             BigDecimal expectedSpendingToday = spendingPaceService.evaluate(savedTransaction, updatedStatement);
 
-            transactionWhatsAppNotificationService.sendInsightMessage(savedTransaction, expectedSpendingToday);
+            transactionNotificationService.sendInsightMessage(savedTransaction, expectedSpendingToday);
         } catch (Exception exception) {
             log.error("Failed to process message subject={}", MessageUtils.safeSubject(message), exception);
         }

@@ -44,7 +44,7 @@ finance:
   statement:
     target-statement-balance: 14000
   transaction-insight:
-    enabled: false
+    enabled: true
   rag:
     enabled: true
     path: "rag"

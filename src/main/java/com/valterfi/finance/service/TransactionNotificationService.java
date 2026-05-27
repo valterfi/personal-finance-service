@@ -95,7 +95,7 @@ public class TransactionNotificationService {
         variables.put("3", purchaseSummary(transaction));
         variables.put("4", formatWholeAmount(currentBalance));
         variables.put("5", formatWholeAmount(targetBalance));
-        variables.put("6", jamesSummary(difference));
+        variables.put("6", jamesSummary(difference, currentBalance, targetBalance));
 
         try {
             return objectMapper.writeValueAsString(variables);
@@ -148,14 +148,25 @@ public class TransactionNotificationService {
                 + ", foi aprovada";
     }
 
-    private String jamesSummary(BigDecimal difference) {
+    private String jamesSummary(BigDecimal difference, BigDecimal currentBalance, BigDecimal targetBalance) {
+        String targetSummary = targetSummary(currentBalance, targetBalance);
+
         if (difference.signum() > 0) {
-            return "Você está " + formatWholeAmount(difference) + " acima do esperado hoje.";
+            return "Você está " + formatWholeAmount(difference) + " acima do esperado hoje" + targetSummary;
         }
         if (difference.signum() < 0) {
-            return "Você está " + formatWholeAmount(difference.abs()) + " abaixo do esperado hoje.";
+            return "Você está " + formatWholeAmount(difference.abs()) + " abaixo do esperado hoje" + targetSummary;
         }
-        return "Você está dentro do esperado hoje.";
+        return "Você está dentro do esperado hoje" + targetSummary;
+    }
+
+    private String targetSummary(BigDecimal currentBalance, BigDecimal targetBalance) {
+        if (currentBalance.compareTo(targetBalance) > 0) {
+            return " Você ultrapassou a meta do ciclo em " + formatWholeAmount(currentBalance.subtract(targetBalance));
+        }
+
+        BigDecimal missingToTarget = targetBalance.subtract(currentBalance);
+        return " Faltam apenas " + formatWholeAmount(missingToTarget) + " para atingir a meta do ciclo";
     }
 
     private String formatAmount(BigDecimal amount) {

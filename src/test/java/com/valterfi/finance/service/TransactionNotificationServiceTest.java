@@ -84,7 +84,11 @@ class TransactionNotificationServiceTest {
         Assertions.assertTrue(String.valueOf(variables.get("5")).contains("14.000"));
         Assertions.assertTrue(String.valueOf(variables.get("6")).contains("Você está R$"));
         Assertions.assertTrue(String.valueOf(variables.get("6")).contains("533"));
-        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("acima do esperado hoje."));
+        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("acima do esperado hoje"));
+        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("Faltam apenas R$"));
+        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("8.800"));
+        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("para atingir a meta do ciclo"));
+        Assertions.assertFalse(String.valueOf(variables.get("6")).endsWith("."));
     }
 
     @Test
@@ -95,6 +99,21 @@ class TransactionNotificationServiceTest {
         transactionNotificationService.sendInsightMessage(transaction, new BigDecimal("4666.67"));
 
         Assertions.assertTrue(notificationService.messages.isEmpty());
+    }
+
+    @Test
+    void shouldIncludeExceededTargetSummaryWhenCurrentBalanceIsAboveTarget() throws Exception {
+        Transaction transaction = transaction();
+        transaction.setStatement(statement(new BigDecimal("14500.00")));
+        transactionInsightProperties.setEnabled(true);
+
+        transactionNotificationService.sendInsightMessage(transaction, new BigDecimal("4666.67"));
+
+        MessageRequest insightMessage = notificationService.messages.getFirst();
+        Map<?, ?> variables = new ObjectMapper().readValue(insightMessage.contentVariables(), Map.class);
+        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("Você ultrapassou a meta do ciclo em R$"));
+        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("500"));
+        Assertions.assertFalse(String.valueOf(variables.get("6")).endsWith("."));
     }
 
     @ParameterizedTest

@@ -157,7 +157,7 @@ public class TransactionNotificationService {
         if (difference.signum() < 0) {
             return "Você está " + formatWholeAmount(difference.abs()) + " abaixo do esperado hoje" + targetSummary;
         }
-        return "Você está dentro do esperado hoje" + targetSummary;
+        return "Você está dentro do esperado hoje." + targetSummary;
     }
 
     private String targetSummary(BigDecimal currentBalance, BigDecimal targetBalance) {

@@ -30,7 +30,7 @@ public class StatementService {
         log.debug("Finding statement for transactionDate={}", transactionDate);
 
         return statementRepository
-                .findFirstByStartDateLessThanEqualAndClosingDateGreaterThanEqualAndDeletedFalse(
+                .findFirstByStartDateLessThanEqualAndClosingDateGreaterThanAndDeletedFalse(
                         transactionDate,
                         transactionDate)
                 .map(statement -> {
@@ -73,7 +73,7 @@ public class StatementService {
         log.debug("Latest statement before creation: {}", lastStatement);
 
         Statement statement = createNextStatement(lastStatement, transactionDate);
-        while (statement.getClosingDate().isBefore(transactionDate)) {
+        while (!statement.getClosingDate().isAfter(transactionDate)) {
             log.debug("Candidate statement referenceMonth={} startDate={} closingDate={} does not include transactionDate={}. Saving as missing statement.",
                     statement.getReferenceMonth(),
                     statement.getStartDate(),

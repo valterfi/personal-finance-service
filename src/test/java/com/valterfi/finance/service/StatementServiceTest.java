@@ -99,6 +99,30 @@ class StatementServiceTest {
     }
 
     @Test
+    void shouldCreateNextStatementWhenCandidateClosingDateEqualsTransactionDate() {
+        LocalDate transactionDate = LocalDate.of(2026, 5, 29);
+        Statement aprilStatement = statement(
+                10L,
+                LocalDate.of(2026, 4, 1),
+                LocalDate.of(2026, 3, 28),
+                LocalDate.of(2026, 4, 24));
+        ids = new AtomicLong(11L);
+        latestStatement = Optional.of(aprilStatement);
+
+        Statement result = statementService.findOrCreateStatementFor(transactionDate);
+
+        assertEquals(2, savedStatements.size());
+        Statement mayStatement = savedStatements.getFirst();
+        assertEquals(LocalDate.of(2026, 5, 1), mayStatement.getReferenceMonth());
+        assertEquals(LocalDate.of(2026, 4, 25), mayStatement.getStartDate());
+        assertEquals(LocalDate.of(2026, 5, 29), mayStatement.getClosingDate());
+
+        assertEquals(LocalDate.of(2026, 6, 1), result.getReferenceMonth());
+        assertEquals(LocalDate.of(2026, 5, 30), result.getStartDate());
+        assertEquals(LocalDate.of(2026, 6, 26), result.getClosingDate());
+    }
+
+    @Test
     void shouldIncrementStatementCurrentBalanceWithTransactionAmount() {
         Statement statement = statement(
                 1L,
@@ -153,7 +177,7 @@ class StatementServiceTest {
                 StatementRepository.class.getClassLoader(),
                 new Class<?>[] { StatementRepository.class },
                 (proxy, method, args) -> {
-                    if ("findFirstByStartDateLessThanEqualAndClosingDateGreaterThanEqualAndDeletedFalse".equals(method.getName())) {
+                    if ("findFirstByStartDateLessThanEqualAndClosingDateGreaterThanAndDeletedFalse".equals(method.getName())) {
                         return existingStatement;
                     }
                     if ("findFirstByDeletedFalseOrderByReferenceMonthDesc".equals(method.getName())) {

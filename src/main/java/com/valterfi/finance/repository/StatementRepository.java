@@ -9,7 +9,7 @@ import com.valterfi.finance.model.Statement;
 
 public interface StatementRepository extends JpaRepository<Statement, Long> {
 
-    Optional<Statement> findFirstByStartDateLessThanEqualAndClosingDateGreaterThanEqualAndDeletedFalse(
+    Optional<Statement> findFirstByStartDateLessThanEqualAndClosingDateGreaterThanAndDeletedFalse(
             LocalDate startDate,
             LocalDate closingDate);
 

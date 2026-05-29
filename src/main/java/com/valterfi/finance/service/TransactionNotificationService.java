@@ -95,8 +95,8 @@ public class TransactionNotificationService {
         variables.put("1", insight.emoji());
         variables.put("2", insight.label());
         variables.put("3", purchaseSummary(transaction));
-        variables.put("4", bold(formatWholeAmount(currentBalance)));
-        variables.put("5", bold(formatWholeAmount(targetBalance)));
+        variables.put("4", bold(formatAmount(currentBalance)));
+        variables.put("5", bold(formatAmount(targetBalance)));
         variables.put("6", jamesSummary(difference, currentBalance, targetBalance, transaction.getDate(), statement));
 
         try {
@@ -160,21 +160,21 @@ public class TransactionNotificationService {
         String dailyPaceSummary = dailyPaceSummary(currentBalance, targetBalance, transactionDate, statement);
 
         if (difference.signum() > 0) {
-            return "Você está " + bold(formatWholeAmount(difference)) + " acima do esperado hoje. " + targetSummary + ". " + dailyPaceSummary;
+            return "Você está " + bold(formatAmount(difference)) + " acima do esperado hoje. " + targetSummary + ". " + dailyPaceSummary;
         }
         if (difference.signum() < 0) {
-            return "Você está " + bold(formatWholeAmount(difference.abs())) + " abaixo do esperado hoje. " + targetSummary + ". " + dailyPaceSummary;
+            return "Você está " + bold(formatAmount(difference.abs())) + " abaixo do esperado hoje. " + targetSummary + ". " + dailyPaceSummary;
         }
         return "Você está dentro do esperado hoje. " + targetSummary + ". " + dailyPaceSummary;
     }
 
     private String targetSummary(BigDecimal currentBalance, BigDecimal targetBalance) {
         if (currentBalance.compareTo(targetBalance) > 0) {
-            return "Você ultrapassou a meta do ciclo em " + bold(formatWholeAmount(currentBalance.subtract(targetBalance)));
+            return "Você ultrapassou a meta do ciclo em " + bold(formatAmount(currentBalance.subtract(targetBalance)));
         }
 
         BigDecimal missingToTarget = targetBalance.subtract(currentBalance);
-        return "Faltam apenas " + bold(formatWholeAmount(missingToTarget)) + " para atingir a meta do ciclo";
+        return "Faltam apenas " + bold(formatAmount(missingToTarget)) + " para atingir a meta do ciclo";
     }
 
     private String dailyPaceSummary(
@@ -185,26 +185,19 @@ public class TransactionNotificationService {
         long currentCycleDay = Math.max(1, ChronoUnit.DAYS.between(statement.getStartDate(), transactionDate) + 1);
         long remainingCycleDays = Math.max(0, ChronoUnit.DAYS.between(transactionDate, statement.getClosingDate()));
         BigDecimal missingToTarget = targetBalance.subtract(currentBalance).max(BigDecimal.ZERO);
-        BigDecimal averageDailySpending = currentBalance.divide(BigDecimal.valueOf(currentCycleDay), 0, RoundingMode.HALF_UP);
+        BigDecimal averageDailySpending = currentBalance.divide(BigDecimal.valueOf(currentCycleDay), 2, RoundingMode.HALF_UP);
         BigDecimal recommendedDailyLimit = remainingCycleDays == 0
                 ? BigDecimal.ZERO
-                : missingToTarget.divide(BigDecimal.valueOf(remainingCycleDays), 0, RoundingMode.HALF_UP);
+                : missingToTarget.divide(BigDecimal.valueOf(remainingCycleDays), 2, RoundingMode.HALF_UP);
 
         return "Você está gastando em média "
-                + bold(formatWholeAmount(averageDailySpending) + "/dia")
+                + bold(formatAmount(averageDailySpending) + "/dia")
                 + " no ciclo. Para terminar dentro da meta, o ideal agora é manter os próximos dias em até "
-                + bold(formatWholeAmount(recommendedDailyLimit) + "/dia");
+                + bold(formatAmount(recommendedDailyLimit) + "/dia");
     }
 
     private String formatAmount(BigDecimal amount) {
         return NumberFormat.getCurrencyInstance(BRAZIL).format(amount);
-    }
-
-    private String formatWholeAmount(BigDecimal amount) {
-        NumberFormat numberFormat = NumberFormat.getCurrencyInstance(BRAZIL);
-        numberFormat.setMinimumFractionDigits(0);
-        numberFormat.setMaximumFractionDigits(0);
-        return numberFormat.format(amount.setScale(0, RoundingMode.HALF_UP));
     }
 
     private String bold(String value) {

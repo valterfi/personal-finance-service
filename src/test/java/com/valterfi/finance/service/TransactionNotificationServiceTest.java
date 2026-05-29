@@ -80,20 +80,20 @@ class TransactionNotificationServiceTest {
         Assertions.assertTrue(String.valueOf(variables.get("3")).contains("*25/05/2026* às *10:12*"));
         Assertions.assertTrue(String.valueOf(variables.get("3")).contains("*W FEIJO SAO PAULO BRA*"));
         Assertions.assertTrue(String.valueOf(variables.get("4")).contains("*R$"));
-        Assertions.assertTrue(String.valueOf(variables.get("4")).contains("5.200*"));
+        Assertions.assertTrue(String.valueOf(variables.get("4")).contains("5.200,00*"));
         Assertions.assertTrue(String.valueOf(variables.get("5")).contains("*R$"));
-        Assertions.assertTrue(String.valueOf(variables.get("5")).contains("14.000*"));
+        Assertions.assertTrue(String.valueOf(variables.get("5")).contains("14.000,00*"));
         Assertions.assertTrue(String.valueOf(variables.get("6")).contains("Você está *R$"));
-        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("533*"));
+        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("533,33*"));
         Assertions.assertTrue(String.valueOf(variables.get("6")).contains("acima do esperado hoje"));
         Assertions.assertTrue(String.valueOf(variables.get("6")).contains("Faltam apenas *R$"));
-        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("8.800*"));
+        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("8.800,00*"));
         Assertions.assertTrue(String.valueOf(variables.get("6")).contains("para atingir a meta do ciclo"));
         Assertions.assertTrue(String.valueOf(variables.get("6")).contains("Você está gastando em média *R$"));
-        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("520/dia* no ciclo"));
-        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("520/dia* no ciclo. Para terminar dentro da meta"));
+        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("520,00/dia* no ciclo"));
+        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("520,00/dia* no ciclo. Para terminar dentro da meta"));
         Assertions.assertTrue(String.valueOf(variables.get("6")).contains("manter os próximos dias em até *R$"));
-        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("440/dia*"));
+        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("440,00/dia*"));
         Assertions.assertTrue(String.valueOf(variables.get("6")).contains("hoje. Faltam apenas"));
         Assertions.assertTrue(String.valueOf(variables.get("6")).contains("meta do ciclo. Você está gastando"));
     }
@@ -119,12 +119,12 @@ class TransactionNotificationServiceTest {
         MessageRequest insightMessage = notificationService.messages.getFirst();
         Map<?, ?> variables = new ObjectMapper().readValue(insightMessage.contentVariables(), Map.class);
         Assertions.assertTrue(String.valueOf(variables.get("6")).contains("Você ultrapassou a meta do ciclo em *R$"));
-        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("500*"));
+        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("500,00*"));
         Assertions.assertTrue(String.valueOf(variables.get("6")).contains("Você está gastando em média *R$"));
-        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("1.450/dia* no ciclo"));
-        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("0/dia*"));
+        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("1.450,00/dia* no ciclo"));
+        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("0,00/dia*"));
         Assertions.assertTrue(String.valueOf(variables.get("6")).contains("hoje. Você ultrapassou"));
-        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("500*. Você está gastando"));
+        Assertions.assertTrue(String.valueOf(variables.get("6")).contains("500,00*. Você está gastando"));
     }
 
     @ParameterizedTest
